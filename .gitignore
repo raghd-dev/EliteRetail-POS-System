@@ -1,0 +1,33 @@
+# Maven
+/target/
+*.class
+/out/
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Logs and generated output
+*.log
+/receipts/
+*.pdf
+
+# Local database credentials - never commit
+/database.properties
+
+# Temporary files
+*.tmp
+*.swp

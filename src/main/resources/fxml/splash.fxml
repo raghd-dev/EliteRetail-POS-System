@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+
+<StackPane fx:id="root"
+           xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.eliteretail.pos.controller.SplashController"
+           styleClass="splash-root">
+
+
+    <VBox alignment="CENTER"
+          spacing="35"
+          prefWidth="1100"
+          prefHeight="720">
+
+
+        <!-- LOGO -->
+
+        <ImageView fx:id="logoWrap"
+                   fitWidth="230"
+                   preserveRatio="true"
+                   styleClass="splash-logo">
+
+
+            <image>
+
+                <Image url="@/images/app-icon-256.png"/>
+
+            </image>
+
+
+        </ImageView>
+
+
+
+
+        <!-- TITLE -->
+
+
+        <VBox fx:id="titleGroup"
+              alignment="CENTER"
+              spacing="8">
+
+
+            <Label text="EliteRetail"
+                   styleClass="splash-title"/>
+
+
+            <Label text="POS System"
+                   styleClass="splash-subtitle"/>
+
+
+        </VBox>
+
+
+
+
+        <Label fx:id="subtitleLabel"
+               text="Professional Retail Management Solution"
+               styleClass="splash-description"/>
+
+
+
+
+        <Button fx:id="getStartedButton"
+                text="Get Started  →"
+                onAction="#handleGetStarted"
+                styleClass="splash-button"/>
+
+
+
+    </VBox>
+
+
+</StackPane>

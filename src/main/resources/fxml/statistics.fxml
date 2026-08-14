@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.eliteretail.pos.controller.StatisticsController"
+            stylesheets="@../css/styles.css" styleClass="app-shell" prefWidth="1120" prefHeight="760">
+    <top><HBox styleClass="header" alignment="CENTER_LEFT" spacing="12"><ImageView fitWidth="38" fitHeight="38" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView><VBox spacing="1"><Label text="EliteRetail POS" styleClass="brand-name"/><Label text="ANALYTICS WORKSPACE" styleClass="brand-caption"/></VBox><Region HBox.hgrow="ALWAYS"/><Label text="Statistics" styleClass="role-badge"/></HBox></top>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll">
+            <VBox styleClass="app-content">
+                <HBox alignment="CENTER_LEFT"><VBox spacing="5"><Label text="Sales Analytics" styleClass="page-title"/><Label text="Monitor today’s revenue, transactions, discounts, and product performance." styleClass="page-subtitle"/></VBox><Region HBox.hgrow="ALWAYS"/><Button text="Refresh" onAction="#handleRefresh" styleClass="primary-button"/><Button text="Export Report" onAction="#onExportReportClicked" styleClass="export-button"/></HBox>
+                <GridPane hgap="14">
+                    <columnConstraints><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/></columnConstraints>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="0"><Label text="TOTAL SALES TODAY" styleClass="metric-label"/><Label fx:id="totalSalesLabel" text="0.00" styleClass="metric-value"/><Label text="Gross sales value" styleClass="metric-note"/></VBox>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="1"><Label text="TRANSACTIONS" styleClass="metric-label"/><Label fx:id="totalTransactionsLabel" text="0" styleClass="metric-value"/><Label text="Completed bills" styleClass="metric-note"/></VBox>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="2"><Label text="AVERAGE TICKET" styleClass="metric-label"/><Label fx:id="averageTransactionLabel" text="0.00" styleClass="metric-value"/><Label text="Mean transaction value" styleClass="metric-note"/></VBox>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="3"><Label text="DISCOUNTS" styleClass="metric-label"/><Label fx:id="totalDiscountsLabel" text="0.00" styleClass="metric-value"/><Label text="Discount value today" styleClass="metric-note"/></VBox>
+                </GridPane>
+                <HBox spacing="16">
+                    <VBox styleClass="panel-card" spacing="10" HBox.hgrow="ALWAYS"><VBox spacing="2"><Label text="Sales by Hour" styleClass="section-title"/><Label text="Daily revenue distribution" styleClass="section-subtitle"/></VBox><BarChart fx:id="salesChart" legendVisible="false" animated="false" prefHeight="300" VBox.vgrow="ALWAYS"><xAxis><CategoryAxis fx:id="xAxis" label="Hour"/></xAxis><yAxis><NumberAxis fx:id="yAxis" label="Sales ($)"/></yAxis></BarChart></VBox>
+                    <VBox styleClass="panel-card" spacing="10" prefWidth="430"><VBox spacing="2"><Label text="Top Selling Products" styleClass="section-title"/><Label text="Ranked by sold quantity and sales amount" styleClass="section-subtitle"/></VBox><TableView fx:id="topProductsTable" VBox.vgrow="ALWAYS"><columns><TableColumn fx:id="productNameColumn" text="PRODUCT" prefWidth="185"/><TableColumn fx:id="salesAmountColumn" text="SALES" prefWidth="105"/><TableColumn fx:id="quantityColumn" text="QTY" prefWidth="85"/></columns></TableView></VBox>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    <bottom><HBox styleClass="footer" alignment="CENTER_LEFT"><Button text="Back to Dashboard" onAction="#handleClose" styleClass="back-button"/><Region HBox.hgrow="ALWAYS"/><Label text="Reports reflect data available in the configured database" styleClass="brand-caption"/></HBox></bottom>
+</BorderPane>

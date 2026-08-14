@@ -1,0 +1,119 @@
+package com.eliteretail.pos.service;
+
+import com.eliteretail.pos.model.Discount;
+import com.eliteretail.pos.repository.DiscountRepository;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class DiscountService {
+    private static final Logger LOGGER = Logger.getLogger(DiscountService.class.getName());
+    private final DiscountRepository discountRepository = new DiscountRepository();
+
+    public List<Discount> getAllDiscounts() { return discountRepository.getAllDiscounts(); }
+    public Discount getDiscountById(int id) { return discountRepository.getDiscountById(id); }
+    public List<Discount> getActiveDiscounts() { return discountRepository.getActiveDiscounts(); }
+    public List<String> getAllProductNames() { return discountRepository.getAllProductNames(); }
+
+    public boolean addDiscount(Discount discount) {
+        validateDiscount(discount);
+        return discountRepository.addDiscount(discount);
+    }
+
+    public boolean updateDiscount(Discount discount) {
+        validateDiscount(discount);
+        return discountRepository.updateDiscount(discount);
+    }
+
+    public boolean deleteDiscount(int id) { return discountRepository.deleteDiscount(id); }
+
+    private void validateDiscount(Discount discount) {
+        if (discount == null) {
+            throw new IllegalArgumentException("Discount is required.");
+        }
+        if (discount.getName() == null || discount.getName().isBlank()) {
+            throw new IllegalArgumentException("Discount name is required.");
+        }
+        if (discount.getStartDate() == null || discount.getEndDate() == null) {
+            throw new IllegalArgumentException("Start and end dates are required.");
+        }
+        if (discount.getStartDate().isAfter(discount.getEndDate())) {
+            throw new IllegalArgumentException("Start date must be before or equal to end date.");
+        }
+        if (discount.getUsageLimit() < 0) {
+            throw new IllegalArgumentException("Usage limit cannot be negative.");
+        }
+
+        if ("BUY_X_GET_Y".equals(discount.getType())) {
+            if (!isValidBuyXGetYTarget(discount.getTargetValue())) {
+                throw new IllegalArgumentException("BUY_X_GET_Y target must use X+Y format, for example 2+1.");
+            }
+        } else if (discount.getValue() <= 0) {
+            throw new IllegalArgumentException("Discount value must be positive.");
+        } else if ("PERCENT".equals(discount.getType()) && discount.getValue() > 100) {
+            throw new IllegalArgumentException("Percentage discounts cannot exceed 100%.");
+        }
+
+        if (discount.getMinQuantity() < 0) {
+            throw new IllegalArgumentException("Minimum quantity cannot be negative.");
+        }
+        if (discount.getMinPurchaseAmount() < 0) {
+            throw new IllegalArgumentException("Minimum purchase amount cannot be negative.");
+        }
+    }
+
+    /**
+     * Returns the discount amount per unit. The caller can multiply the result by quantity
+     * to calculate the line-level discount consistently for every discount type.
+     */
+    public double calculateDiscount(double unitPrice, Discount discount, int quantity) {
+        if (discount == null || !discount.isValid() || quantity <= 0) {
+            return 0.0;
+        }
+        if (quantity < discount.getMinQuantity()) {
+            return 0.0;
+        }
+        if (unitPrice * quantity < discount.getMinPurchaseAmount()) {
+            return 0.0;
+        }
+
+        return switch (discount.getType()) {
+            case "PERCENT" -> Math.min(unitPrice, unitPrice * (discount.getValue() / 100.0));
+            case "FIXED_AMOUNT" -> Math.min(discount.getValue(), unitPrice);
+            case "BUY_X_GET_Y" -> calculateBuyXGetYPerUnit(unitPrice, discount, quantity);
+            default -> 0.0;
+        };
+    }
+
+    private double calculateBuyXGetYPerUnit(double unitPrice, Discount discount, int quantity) {
+        try {
+            String[] parts = discount.getTargetValue().split("\\+");
+            int buyX = Integer.parseInt(parts[0].trim());
+            int getY = Integer.parseInt(parts[1].trim());
+            int groupSize = buyX + getY;
+            int freeItems = (quantity / groupSize) * getY;
+            int remainder = quantity % groupSize;
+            freeItems += Math.max(0, Math.min(getY, remainder - buyX));
+            return (freeItems * unitPrice) / quantity;
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Unable to calculate BUY_X_GET_Y discount.", e);
+            return 0.0;
+        }
+    }
+
+    public static boolean isValidBuyXGetYTarget(String targetValue) {
+        if (targetValue == null || targetValue.isBlank()) {
+            return false;
+        }
+        try {
+            String[] parts = targetValue.split("\\+");
+            if (parts.length != 2) {
+                return false;
+            }
+            return Integer.parseInt(parts[0].trim()) > 0 && Integer.parseInt(parts[1].trim()) > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+}

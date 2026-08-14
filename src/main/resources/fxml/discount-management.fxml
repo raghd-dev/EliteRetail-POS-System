@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.eliteretail.pos.controller.DiscountManagementController"
+            stylesheets="@../css/styles.css" styleClass="app-shell" prefWidth="1100" prefHeight="720">
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT" spacing="12">
+            <ImageView fitWidth="38" fitHeight="38" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView>
+            <VBox spacing="1"><Label text="EliteRetail POS" styleClass="brand-name"/><Label text="PROMOTIONS WORKSPACE" styleClass="brand-caption"/></VBox>
+            <Region HBox.hgrow="ALWAYS"/><Label text="Discount Management" styleClass="role-badge"/>
+        </HBox>
+    </top>
+    <center>
+        <VBox styleClass="app-content">
+            <HBox alignment="CENTER_LEFT"><VBox spacing="5"><Label text="Discounts &amp; Promotions" styleClass="page-title"/><Label text="Create, review, and maintain retail offers without changing checkout logic." styleClass="page-subtitle"/></VBox><Region HBox.hgrow="ALWAYS"/><Button text="Add Discount" fx:id="addButton" styleClass="success-button"/></HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-card">
+                <Label text="FILTER" styleClass="input-label"/><ComboBox fx:id="filterCombo" promptText="All Discounts" prefWidth="180" styleClass="modern-field"/>
+                <Region prefWidth="8"/><Label text="SEARCH" styleClass="input-label"/><TextField fx:id="searchField" promptText="Search discounts" prefWidth="260" styleClass="modern-field" onAction="#handleSearch"/>
+                <Button text="Search" onAction="#handleSearch" styleClass="search-button"/>
+                <Region HBox.hgrow="ALWAYS"/><Label fx:id="statusLabel" styleClass="field-helper"/>
+            </HBox>
+            <VBox styleClass="panel-card" spacing="12" VBox.vgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT"><VBox spacing="2"><Label text="Promotion Library" styleClass="section-title"/><Label text="Active and configured discount rules" styleClass="section-subtitle"/></VBox><Region HBox.hgrow="ALWAYS"/><Label text="OFFERS" styleClass="role-badge"/></HBox>
+                <ListView fx:id="discountList" VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10" alignment="CENTER_RIGHT"><Button text="Edit Selected" fx:id="editButton" styleClass="primary-button"/><Button text="Delete Selected" fx:id="deleteButton" styleClass="danger-button"/></HBox>
+            </VBox>
+        </VBox>
+    </center>
+    <bottom><HBox styleClass="footer" alignment="CENTER_LEFT"><Button text="Back to Dashboard" fx:id="backButton" styleClass="back-button"/><Region HBox.hgrow="ALWAYS"/><Label text="Promotion changes continue to use the existing DiscountService" styleClass="brand-caption"/></HBox></bottom>
+</BorderPane>

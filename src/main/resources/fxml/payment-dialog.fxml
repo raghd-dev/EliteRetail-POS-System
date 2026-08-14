@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.eliteretail.pos.controller.PaymentDialogController"
+      stylesheets="@../css/styles.css" spacing="18" prefWidth="460" style="-fx-padding: 24; -fx-background-color: #F4F7FB;">
+    <HBox spacing="10" alignment="CENTER_LEFT"><ImageView fitWidth="34" fitHeight="34" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView><VBox spacing="1"><Label text="Complete Payment" styleClass="dialog-title"/><Label text="Confirm the customer’s payment method and amount." styleClass="section-subtitle"/></VBox></HBox>
+    <VBox spacing="5" styleClass="payment-due"><Label text="AMOUNT DUE" styleClass="input-label"/><Label fx:id="amountDueLabel" text="/$0.00" styleClass="total-value"/></VBox>
+    <VBox spacing="7"><Label text="PAYMENT METHOD" styleClass="input-label"/><ComboBox fx:id="methodComboBox" styleClass="modern-field" maxWidth="Infinity"/></VBox>
+    <VBox fx:id="cashSection" styleClass="card" spacing="12">
+        <VBox spacing="7"><Label text="AMOUNT RECEIVED" styleClass="input-label"/><TextField fx:id="amountReceivedField" promptText="0.00" styleClass="modern-field"/></VBox>
+        <HBox alignment="CENTER_LEFT"><Label text="Change Due" styleClass="receipt-total-label"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="changeLabel" text="/$0.00" styleClass="receipt-grand-value"/></HBox>
+    </VBox>
+    <HBox spacing="10" alignment="CENTER_RIGHT"><Button fx:id="cancelButton" text="Cancel" styleClass="secondary-button"/><Button fx:id="confirmButton" text="Confirm Payment" styleClass="success-button"/></HBox>
+</VBox>

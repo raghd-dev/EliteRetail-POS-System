@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.eliteretail.pos.controller.ReceiptController"
+           stylesheets="@../css/styles.css" styleClass="receipt-page" prefWidth="520" prefHeight="720">
+    <VBox styleClass="receipt-card" spacing="13" maxWidth="485">
+        <HBox spacing="10" alignment="CENTER_LEFT"><ImageView fitWidth="45" fitHeight="45" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView><VBox spacing="1"><Label text="ELITERETAIL POS" styleClass="receipt-brand"/><Label text="Professional Retail Receipt" styleClass="receipt-caption"/><Label text="Demo Store • Local POS" styleClass="receipt-caption"/></VBox><Region HBox.hgrow="ALWAYS"/><Label text="PAID" styleClass="status-pill, status-pill-success"/></HBox>
+        <Separator/>
+        <GridPane hgap="12" vgap="7">
+            <columnConstraints><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/></columnConstraints>
+            <VBox spacing="2" GridPane.columnIndex="0"><Label text="RECEIPT" styleClass="receipt-meta-label"/><Label fx:id="billNumberLabel" text="—" styleClass="receipt-meta-value"/></VBox>
+            <VBox spacing="2" GridPane.columnIndex="1"><Label text="CASHIER" styleClass="receipt-meta-label"/><Label fx:id="cashierNameLabel" text="—" styleClass="receipt-meta-value"/></VBox>
+            <VBox spacing="2" GridPane.columnIndex="2"><Label text="DATE" styleClass="receipt-meta-label"/><Label fx:id="dateLabel" text="—" styleClass="receipt-meta-value"/></VBox>
+            <VBox spacing="2" GridPane.columnIndex="3"><Label text="TIME" styleClass="receipt-meta-label"/><Label fx:id="timeLabel" text="—" styleClass="receipt-meta-value"/></VBox>
+        </GridPane>
+        <TableView fx:id="receiptTable" styleClass="table-view, receipt-table" prefHeight="265" VBox.vgrow="ALWAYS">
+            <columns><TableColumn fx:id="codeCol" text="CODE" prefWidth="58"/><TableColumn fx:id="nameCol" text="ITEM" prefWidth="125"/><TableColumn fx:id="qtyCol" text="QTY" prefWidth="42"/><TableColumn fx:id="priceCol" text="PRICE" prefWidth="65"/><TableColumn fx:id="discountCol" text="DISC" prefWidth="60"/><TableColumn fx:id="totalCol" text="TOTAL" prefWidth="70"/></columns>
+        </TableView>
+        <HBox spacing="18">
+            <VBox styleClass="surface-muted" spacing="6" HBox.hgrow="ALWAYS"><Label text="PAYMENT" styleClass="receipt-meta-label"/><Label fx:id="paymentMethodLabel" text="—" styleClass="receipt-meta-value"/><HBox><Label text="Received" styleClass="receipt-total-label"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="receivedLabel" text="/$0.00" styleClass="receipt-total-value"/></HBox><HBox><Label text="Change" styleClass="receipt-total-label"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="changeLabel" text="/$0.00" styleClass="receipt-total-value"/></HBox></VBox>
+            <VBox spacing="7" prefWidth="205"><HBox><Label text="Subtotal" styleClass="receipt-total-label"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="subtotalLabel" text="/$0.00" styleClass="receipt-total-value"/></HBox><HBox><Label text="Discount" styleClass="receipt-total-label"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="discountLabel" text="/$0.00" styleClass="receipt-total-value"/></HBox><Separator/><HBox alignment="CENTER_LEFT"><Label text="TOTAL" styleClass="receipt-grand-label"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="totalLabel" text="/$0.00" styleClass="receipt-grand-value"/></HBox></VBox>
+        </HBox>
+        <VBox spacing="4" alignment="CENTER"><Label text="Thank you for shopping with EliteRetail." styleClass="receipt-thanks"/><Label text="Items can be exchanged within 7 days with the original receipt." styleClass="receipt-legal"/></VBox>
+        <Button text="Print / Export PDF" onAction="#handlePrintReceipt" styleClass="primary-button" maxWidth="Infinity"/>
+    </VBox>
+</StackPane>

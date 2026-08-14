@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.eliteretail.pos.controller.LoginController"
+           stylesheets="@../css/styles.css" styleClass="login-page" prefWidth="1100" prefHeight="720">
+    <HBox maxWidth="980" maxHeight="600" minHeight="600" styleClass="login-frame">
+        <VBox prefWidth="430" spacing="24" alignment="TOP_LEFT" styleClass="login-brand-panel">
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <ImageView fitWidth="42" fitHeight="42" preserveRatio="true">
+                    <image><Image url="@../images/pos-logo.png"/></image>
+                </ImageView>
+                <VBox spacing="1">
+                    <Label text="EliteRetail POS" styleClass="login-brand-name"/>
+                    <Label text="RETAIL OPERATIONS PLATFORM" styleClass="login-brand-caption"/>
+                </VBox>
+            </HBox>
+            <Region prefHeight="18"/>
+            <Label text="RETAIL OPERATIONS, SIMPLIFIED" styleClass="login-eyebrow"/>
+            <Label text="Run every checkout with clarity and control." wrapText="true" maxWidth="330" styleClass="login-hero"/>
+            <Label text="A focused workspace for sales, inventory, promotions, and daily performance. designed for fast retail operations." wrapText="true" maxWidth="330" styleClass="login-hero-copy"/>
+            <VBox spacing="14">
+                <HBox spacing="10" alignment="CENTER_LEFT"><Circle radius="4" styleClass="login-feature-dot"/><Label text="Secure role-based access" styleClass="login-feature"/></HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT"><Circle radius="4" styleClass="login-feature-dot"/><Label text="Fast checkout and inventory control" styleClass="login-feature"/></HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT"><Circle radius="4" styleClass="login-feature-dot"/><Label text="Daily sales intelligence" styleClass="login-feature"/></HBox>
+            </VBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label text="EliteRetail POS  Business-ready desktop software" styleClass="brand-caption"/>
+        </VBox>
+
+        <VBox prefWidth="550" alignment="CENTER" styleClass="login-form-panel">
+            <VBox maxWidth="360" spacing="24" alignment="CENTER_LEFT">
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <ImageView fitWidth="42" fitHeight="42" preserveRatio="true">
+                        <image><Image url="@../images/pos-logo.png"/></image>
+                    </ImageView>
+                    <VBox spacing="1">
+                        <Label text="EliteRetail POS" styleClass="brand-name"/>
+                        <Label text="RETAIL OPERATIONS PLATFORM" styleClass="brand-caption"/>
+                    </VBox>
+                </HBox>
+                <VBox spacing="6">
+                    <Label text="Welcome back" styleClass="form-title"/>
+                    <Label text="Sign in to your assigned retail workstation." styleClass="form-subtitle"/>
+                </VBox>
+                <VBox spacing="15">
+                    <VBox spacing="6">
+                        <Label text="CASHIER ID" styleClass="input-label"/>
+                        <TextField fx:id="usernameField" promptText="e.g. cashier001" styleClass="modern-field" prefHeight="42"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="PASSWORD" styleClass="input-label"/>
+                        <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="modern-field" prefHeight="42" onAction="#handleLogin"/>
+                    </VBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <CheckBox fx:id="rememberMeCheckBox" text="Remember cashier ID on this workstation"/>
+                    </HBox>
+                </VBox>
+                <Button text="SIGN IN TO ELITERETAIL" onAction="#handleLogin" styleClass="signin-button"/>
+                <Label fx:id="messageLabel" wrapText="true" styleClass="status-message"/>
+                <Separator/>
+                <Label text="Protected workstation access Credentials are validated against your configured MySQL database." wrapText="true" styleClass="security-note"/>
+            </VBox>
+        </VBox>
+    </HBox>
+</StackPane>

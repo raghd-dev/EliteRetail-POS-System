@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.eliteretail.pos.controller.SalesController"
+            stylesheets="@../css/styles.css" styleClass="app-shell" prefWidth="1240" prefHeight="800">
+    <top>
+        <VBox>
+            <HBox styleClass="header" alignment="CENTER_LEFT" spacing="12">
+                <ImageView fitWidth="40" fitHeight="40" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView>
+                <VBox spacing="1"><Label text="EliteRetail POS" styleClass="brand-name"/><Label text="REGISTER #001 • TERMINAL ACTIVE" styleClass="brand-caption"/></VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox spacing="8" alignment="CENTER_LEFT"><Circle radius="5" fill="#2F855A"/><Label fx:id="machineStatusLabel" text="READY" styleClass="status-ready"/></HBox>
+                <HBox styleClass="user-chip" spacing="9" alignment="CENTER_LEFT"><VBox spacing="1"><Label fx:id="cashierNameLabel" text="Cashier" styleClass="header-username"/><Label fx:id="cashierCodeLabel" text="—" styleClass="header-code"/></VBox></HBox>
+                <Button text="Logout" onAction="#handleLogout" styleClass="logout-button"/>
+            </HBox>
+            <HBox spacing="22" alignment="CENTER_LEFT" styleClass="toolbar-card">
+                <HBox spacing="6"><Label text="TIME" styleClass="input-label"/><Label fx:id="timeLabel" styleClass="header-code"/></HBox>
+                <HBox spacing="6"><Label text="DATE" styleClass="input-label"/><Label fx:id="dateLabel" styleClass="header-code"/></HBox>
+                <HBox spacing="6"><Label text="BILL" styleClass="input-label"/><Label fx:id="billSerialLabel" styleClass="header-code"/></HBox>
+                <HBox spacing="6"><Label text="ITEMS" styleClass="input-label"/><Label fx:id="cartCountLabel" text="0" styleClass="header-code"/></HBox>
+                <Region HBox.hgrow="ALWAYS"/><Label text="SECURE CHECKOUT SESSION" styleClass="role-badge"/>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.30">
+            <VBox styleClass="panel-card" spacing="20">
+                <VBox spacing="4"><Label text="Add Products" styleClass="section-title"/><Label text="Select an item and quantity to build the cart." styleClass="section-subtitle"/></VBox>
+                <VBox spacing="7"><Label text="PRODUCT" styleClass="input-label"/><ComboBox fx:id="productComboBox" prefWidth="320" maxWidth="Infinity" styleClass="modern-field"/></VBox>
+                <VBox spacing="7"><Label text="QUANTITY" styleClass="input-label"/><TextField fx:id="amountField" promptText="1" styleClass="modern-field" onAction="#handleAddToCart"/></VBox>
+                <Button text="Add to Cart" onAction="#handleAddToCart" styleClass="primary-button" maxWidth="Infinity"/>
+                <VBox spacing="10" styleClass="surface-muted"><Label text="Checkout tip" styleClass="section-kicker"/><Label text="Stock availability and active discounts are validated using the existing service layer before payment." wrapText="true" styleClass="field-helper"/></VBox>
+                <Region VBox.vgrow="ALWAYS"/>
+                <Button text="Clear Cart" onAction="#handleClearCart" styleClass="danger-button" maxWidth="Infinity"/>
+            </VBox>
+            <VBox styleClass="panel-card" spacing="16">
+                <HBox alignment="CENTER_LEFT"><VBox spacing="3"><Label text="Current Cart" styleClass="section-title"/><Label text="Review quantities, prices, and applied discounts." styleClass="section-subtitle"/></VBox><Region HBox.hgrow="ALWAYS"/><Label text="LIVE CART" styleClass="role-badge"/></HBox>
+                <TableView fx:id="productTable" styleClass="table-view" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="codeCol" text="CODE" prefWidth="85"/>
+                        <TableColumn fx:id="nameCol" text="PRODUCT" prefWidth="220"/>
+                        <TableColumn fx:id="amountCol" text="QTY" prefWidth="70"/>
+                        <TableColumn fx:id="priceCol" text="PRICE" prefWidth="100"/>
+                        <TableColumn fx:id="discountCol" text="DISCOUNT" prefWidth="100"/>
+                        <TableColumn fx:id="totalCol" text="TOTAL" prefWidth="115"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </SplitPane>
+    </center>
+    <bottom>
+        <HBox styleClass="footer" alignment="CENTER_RIGHT" spacing="18">
+            <VBox spacing="3" alignment="CENTER_RIGHT"><Label text="AMOUNT DUE" styleClass="total-label"/><Label fx:id="totalPriceLabel" text="0.00" styleClass="total-value"/></VBox>
+            <Button text="PAY NOW" onAction="#handlePayClick" styleClass="process-sales-button"/>
+        </HBox>
+    </bottom>
+</BorderPane>

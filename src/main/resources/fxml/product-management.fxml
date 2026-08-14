@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.eliteretail.pos.controller.ProductManagementController"
+            stylesheets="@../css/styles.css" styleClass="app-shell" prefWidth="1180" prefHeight="760">
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT" spacing="12">
+            <ImageView fitWidth="38" fitHeight="38" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView>
+            <VBox spacing="1"><Label text="EliteRetail POS" styleClass="brand-name"/><Label text="INVENTORY WORKSPACE" styleClass="brand-caption"/></VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Product Management" styleClass="role-badge"/>
+        </HBox>
+    </top>
+    <center>
+        <VBox styleClass="app-content">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="5"><Label text="Product Catalog" styleClass="page-title"/><Label text="Manage pricing, stock levels, categories, and product information." styleClass="page-subtitle"/></VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Edit Categories" onAction="#handleEditCategories" styleClass="edit-categories-button"/>
+                <Button text="+ Category" onAction="#handleAddCategory" styleClass="secondary-button"/>
+                <Button text="Add Product" onAction="#handleAddProduct" styleClass="success-button"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-card">
+                <TextField fx:id="searchField" promptText="Search by code, name, or category" prefWidth="380" styleClass="modern-field" onAction="#handleSearch"/>
+                <Button text="Search" onAction="#handleSearch" styleClass="search-button"/>
+                <Button text="Clear" onAction="#handleClearSearch" styleClass="secondary-button"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Select a row to edit or delete using its Actions controls." styleClass="field-helper"/>
+            </HBox>
+            <VBox styleClass="panel-card" spacing="12" VBox.vgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT"><VBox spacing="2"><Label text="Inventory" styleClass="section-title"/><Label text="Live catalog data from MySQL" styleClass="section-subtitle"/></VBox><Region HBox.hgrow="ALWAYS"/><Label text="CATALOG" styleClass="role-badge"/></HBox>
+                <TableView fx:id="productsTable" styleClass="table-view" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="codeColumn" text="CODE" prefWidth="95"/>
+                        <TableColumn fx:id="nameColumn" text="PRODUCT" prefWidth="210"/>
+                        <TableColumn fx:id="descriptionColumn" text="DESCRIPTION" prefWidth="270"/>
+                        <TableColumn fx:id="priceColumn" text="PRICE" prefWidth="105"/>
+                        <TableColumn fx:id="stockColumn" text="STOCK" prefWidth="90"/>
+                        <TableColumn fx:id="categoryColumn" text="CATEGORY" prefWidth="150"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+    <bottom><HBox styleClass="footer" alignment="CENTER_LEFT"><Button text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="back-button"/><Region HBox.hgrow="ALWAYS"/><Label text="EliteRetail Inventory • Changes are saved through the existing service layer" styleClass="brand-caption"/></HBox></bottom>
+</BorderPane>

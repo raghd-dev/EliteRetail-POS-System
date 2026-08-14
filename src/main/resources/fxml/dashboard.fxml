@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.eliteretail.pos.controller.DashboardController"
+            stylesheets="@../css/styles.css" styleClass="app-shell" prefWidth="1180" prefHeight="760">
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT" spacing="12">
+            <ImageView fitWidth="42" fitHeight="42" preserveRatio="true"><image><Image url="@../images/pos-logo.png"/></image></ImageView>
+            <VBox spacing="1"><Label text="EliteRetail POS" styleClass="brand-name"/><Label text="RETAIL OPERATIONS PLATFORM" styleClass="brand-caption"/></VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox styleClass="user-chip" spacing="9" alignment="CENTER_LEFT">
+                <StackPane styleClass="user-avatar"><Label text="ER" styleClass="user-avatar-text"/></StackPane>
+                <VBox spacing="1"><Label fx:id="welcomeLabel" text="Welcome" styleClass="header-username"/><Label fx:id="roleLabel" text="USER" styleClass="header-code"/></VBox>
+            </HBox>
+            <Button text="Logout" onAction="#handleLogout" styleClass="logout-button"/>
+        </HBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll">
+            <VBox styleClass="app-content">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="5"><Label text="Operations Dashboard" styleClass="page-title"/><Label text="A concise view of today’s retail performance and system activity." styleClass="page-subtitle"/></VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <VBox alignment="CENTER_RIGHT" spacing="5"><Label text="TODAY" styleClass="section-kicker"/><Label fx:id="dashboardDateLabel" text="—" styleClass="page-subtitle"/></VBox>
+                </HBox>
+
+                <GridPane hgap="14">
+                    <columnConstraints><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/></columnConstraints>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="0">
+                        <HBox alignment="CENTER_LEFT"><StackPane styleClass="metric-badge"><Label text="/$" styleClass="metric-icon"/></StackPane><Region HBox.hgrow="ALWAYS"/><Label text="TODAY" styleClass="role-badge"/></HBox>
+                        <VBox spacing="3"><Label text="Revenue Today" styleClass="metric-label"/><Label fx:id="revenueTodayLabel" text="/$0.00" styleClass="metric-value"/><Label text="Completed sales value" styleClass="metric-note"/></VBox>
+                    </VBox>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="1">
+                        <HBox alignment="CENTER_LEFT"><StackPane styleClass="metric-badge, metric-badge-success"><Label text="#" styleClass="metric-icon, metric-icon-success"/></StackPane></HBox>
+                        <VBox spacing="3"><Label text="Transactions" styleClass="metric-label"/><Label fx:id="transactionsTodayLabel" text="0" styleClass="metric-value"/><Label text="Transactions completed today" styleClass="metric-note"/></VBox>
+                    </VBox>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="2">
+                        <HBox alignment="CENTER_LEFT"><StackPane styleClass="metric-badge, metric-badge-gold"><Label text="P" styleClass="metric-icon, metric-icon-gold"/></StackPane></HBox>
+                        <VBox spacing="3"><Label text="Total Products" styleClass="metric-label"/><Label fx:id="totalProductsLabel" text="0" styleClass="metric-value"/><Label text="Products in the catalog" styleClass="metric-note"/></VBox>
+                    </VBox>
+                    <VBox styleClass="metric-card" GridPane.columnIndex="3">
+                        <HBox alignment="CENTER_LEFT"><StackPane styleClass="metric-badge, metric-badge-warning"><Label text="!" styleClass="metric-icon, metric-icon-warning"/></StackPane></HBox>
+                        <VBox spacing="3"><Label text="Low Stock" styleClass="metric-label"/><Label fx:id="lowStockLabel" text="0" styleClass="metric-value"/><Label text="Items at 5 units or fewer" styleClass="metric-note"/></VBox>
+                    </VBox>
+                </GridPane>
+
+                <HBox spacing="16">
+                    <VBox styleClass="panel-card" spacing="12" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT"><VBox spacing="2"><Label text="Sales Analytics" styleClass="section-title"/><Label text="Revenue by hour for the current day" styleClass="section-subtitle"/></VBox><Region HBox.hgrow="ALWAYS"/><Label text="LIVE DATA" styleClass="role-badge"/></HBox>
+                        <BarChart fx:id="dashboardSalesChart" legendVisible="false" animated="false" prefHeight="280" VBox.vgrow="ALWAYS">
+                            <xAxis><CategoryAxis fx:id="dashboardXAxis" label="Hour"/></xAxis>
+                            <yAxis><NumberAxis fx:id="dashboardYAxis" label="Sales ($)"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                    <VBox styleClass="panel-card" spacing="12" prefWidth="355">
+                        <VBox spacing="2"><Label text="Recent Transactions" styleClass="section-title"/><Label text="Latest completed bills" styleClass="section-subtitle"/></VBox>
+                        <ListView fx:id="recentTransactionsList" styleClass="recent-list" prefHeight="280" VBox.vgrow="ALWAYS"/>
+                    </VBox>
+                </HBox>
+
+                <VBox styleClass="panel-card" spacing="14">
+                    <VBox spacing="2"><Label text="Quick Actions" styleClass="section-title"/><Label text="Open the retail workspace you need." styleClass="section-subtitle"/></VBox>
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/><ColumnConstraints percentWidth="25"/></columnConstraints>
+                        <Button fx:id="manageProductsButton" text="Product Management" onAction="#handleManageProducts" styleClass="nav-button" maxWidth="Infinity" GridPane.columnIndex="0"/>
+                        <Button fx:id="manageDiscountsButton" text="Discount Management" onAction="#handleManageDiscounts" styleClass="nav-button" maxWidth="Infinity" GridPane.columnIndex="1"/>
+                        <Button fx:id="viewStatisticsButton" text="Statistics &amp; Reports" onAction="#handleViewStatistics" styleClass="nav-button" maxWidth="Infinity" GridPane.columnIndex="2"/>
+                        <Button fx:id="processSalesButton" text="Open Sales Register" onAction="#handleProcessSales" styleClass="nav-button, nav-button-primary" maxWidth="Infinity" GridPane.columnIndex="3"/>
+                    </GridPane>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
