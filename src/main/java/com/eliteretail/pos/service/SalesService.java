@@ -3,6 +3,7 @@ package com.eliteretail.pos.service;
 import com.eliteretail.pos.database.DatabaseConnector;
 import com.eliteretail.pos.model.PaymentMethod;
 import com.eliteretail.pos.model.ProductItem;
+import com.eliteretail.pos.model.User;
 import com.eliteretail.pos.repository.BillRepository;
 import com.eliteretail.pos.repository.DiscountRepository;
 import com.eliteretail.pos.repository.ProductRepository;
@@ -23,6 +24,7 @@ public class SalesService {
     private final DiscountRepository discountRepository = new DiscountRepository();
 
     public int getNextDailySerial(String machineNumber) throws SQLException {
+        RoleGuard.requireCashier(AuthService.getInstance().getCurrentUser());
         return billRepository.getNextDailySerial(machineNumber);
     }
 
@@ -42,6 +44,13 @@ public class SalesService {
             List<ProductItem> items,
             Set<Integer> appliedDiscountIds
     ) throws SQLException {
+        User cashier = AuthService.getInstance().getCurrentUser();
+        RoleGuard.requireCashier(cashier);
+        if (!cashier.getCashierCode().equals(cashierCode)) {
+            throw new SecurityException("The sale must be recorded under the signed-in cashier.");
+        }
+        // Use the authenticated cashier's name, not caller-provided display text.
+        cashierName = cashier.getCashierName();
         CheckoutValidator.validate(totalAmount, totalDiscount, paymentMethod,
                 amountReceived, changeAmount, items);
         try (Connection connection = DatabaseConnector.getConnection()) {

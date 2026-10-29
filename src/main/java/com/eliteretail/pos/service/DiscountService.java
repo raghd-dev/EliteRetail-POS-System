@@ -15,22 +15,47 @@ public class DiscountService {
     private static final Logger LOGGER = Logger.getLogger(DiscountService.class.getName());
     private final DiscountRepository discountRepository = new DiscountRepository();
 
-    public List<Discount> getAllDiscounts() { return discountRepository.getAllDiscounts(); }
-    public Discount getDiscountById(int id) { return discountRepository.getDiscountById(id); }
-    public List<Discount> getActiveDiscounts() { return discountRepository.getActiveDiscounts(); }
-    public List<String> getAllProductNames() { return discountRepository.getAllProductNames(); }
+    private void requireManager() {
+        RoleGuard.requireManager(AuthService.getInstance().getCurrentUser());
+    }
+
+    public List<Discount> getAllDiscounts() {
+        requireManager();
+        return discountRepository.getAllDiscounts();
+    }
+
+    public Discount getDiscountById(int id) {
+        requireManager();
+        return discountRepository.getDiscountById(id);
+    }
+
+    public List<Discount> getActiveDiscounts() {
+        RoleGuard.requireSignedIn(AuthService.getInstance().getCurrentUser());
+        return discountRepository.getActiveDiscounts();
+    }
+
+    public List<String> getAllProductNames() {
+        requireManager();
+        return discountRepository.getAllProductNames();
+    }
 
     public boolean addDiscount(Discount discount) {
+        requireManager();
         validateDiscount(discount);
         return discountRepository.addDiscount(discount);
     }
 
     public boolean updateDiscount(Discount discount) {
+        requireManager();
         validateDiscount(discount);
         return discountRepository.updateDiscount(discount);
     }
 
-    public boolean deleteDiscount(int id) { return discountRepository.deleteDiscount(id); }
+    public boolean deleteDiscount(int id) {
+        requireManager();
+        return discountRepository.deleteDiscount(id);
+    }
+
 
     private void validateDiscount(Discount discount) {
         if (discount == null) {

@@ -8,25 +8,38 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository = new ProductRepository();
 
+    private void requireSignedIn() {
+        RoleGuard.requireSignedIn(AuthService.getInstance().getCurrentUser());
+    }
+
+    private void requireManager() {
+        RoleGuard.requireManager(AuthService.getInstance().getCurrentUser());
+    }
+
     public List<ProductItem> getAllProducts() {
+        requireSignedIn();
         return productRepository.findAll();
     }
 
     public List<ProductItem> getAvailableProducts() {
+        requireSignedIn();
         return productRepository.findAvailable();
     }
 
     public boolean addProduct(ProductItem product) {
+        requireManager();
         validate(product);
         return productRepository.insert(product);
     }
 
     public boolean updateProduct(ProductItem product) {
+        requireManager();
         validate(product);
         return productRepository.update(product);
     }
 
     public boolean deleteProduct(String code) {
+        requireManager();
         if (code == null || code.isBlank()) {
             throw new IllegalArgumentException("Product code is required.");
         }
@@ -34,6 +47,7 @@ public class ProductService {
     }
 
     public ProductItem findProductByCode(String code) {
+        requireSignedIn();
         if (code == null || code.isBlank()) {
             return null;
         }

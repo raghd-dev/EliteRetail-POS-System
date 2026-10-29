@@ -15,8 +15,8 @@ class PasswordUtilsTest {
     }
 
     @Test
-    void legacyPlaintextPasswordsRemainCompatible() {
-        assertTrue(PasswordUtils.verify("legacy", "legacy"));
+    void legacyPlaintextPasswordsAreRejected() {
+        assertFalse(PasswordUtils.verify("legacy", "legacy"));
         assertFalse(PasswordUtils.verify("wrong", "legacy"));
     }
 

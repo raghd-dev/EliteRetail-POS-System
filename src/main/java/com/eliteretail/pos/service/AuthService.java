@@ -14,6 +14,8 @@ public final class AuthService {
     public static AuthService getInstance() { return INSTANCE; }
 
     public boolean login(String cashierCode, String password) {
+        // A failed attempt must not retain an earlier authenticated session.
+        currentUser = null;
         User user = userRepository.authenticate(cashierCode, password);
         if (user == null) {
             return false;

@@ -33,6 +33,7 @@ public class StatisticsService {
     }
 
     private <T> T safely(SqlSupplier<T> supplier, T fallback) {
+        RoleGuard.requireManager(AuthService.getInstance().getCurrentUser());
         try {
             return supplier.get();
         } catch (SQLException e) {

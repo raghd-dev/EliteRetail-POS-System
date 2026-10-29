@@ -2,7 +2,6 @@ package com.eliteretail.pos.utils;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -33,11 +32,9 @@ public final class PasswordUtils {
         if (providedPassword == null || storedPassword == null) {
             return false;
         }
+        // Accept only PBKDF2 hashes. Plaintext compatibility has been retired.
         if (!storedPassword.startsWith(PREFIX + "$")) {
-            return MessageDigest.isEqual(
-                    providedPassword.getBytes(StandardCharsets.UTF_8),
-                    storedPassword.getBytes(StandardCharsets.UTF_8)
-            );
+            return false;
         }
 
         String[] parts = storedPassword.split("\\$", 4);
