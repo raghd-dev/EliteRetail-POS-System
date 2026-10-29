@@ -2,6 +2,7 @@ package com.eliteretail.pos.service;
 
 import com.eliteretail.pos.model.PaymentMethod;
 import com.eliteretail.pos.model.ProductItem;
+import com.eliteretail.pos.utils.MoneyAmounts;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -64,10 +65,10 @@ public final class CheckoutValidator {
         if (!Double.isFinite(number)) {
             throw new SQLException("Invalid " + field + ": amount must be finite.");
         }
-        return BigDecimal.valueOf(number);
+        return MoneyAmounts.exact(number);
     }
 
     private static BigDecimal cents(double number, String field) throws SQLException {
-        return checked(number, field).setScale(2, RoundingMode.HALF_UP);
+        return MoneyAmounts.cents(checked(number, field));
     }
 }

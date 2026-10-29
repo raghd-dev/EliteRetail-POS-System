@@ -1,5 +1,7 @@
 package com.eliteretail.pos.model;
 
+import com.eliteretail.pos.utils.MoneyAmounts;
+
 public class ProductItem {
     private String code;
     private String name;
@@ -19,10 +21,10 @@ public class ProductItem {
         this.code = code;
         this.name = name;
         this.description = description;
-        this.unitPrice = unitPrice;
+        this.unitPrice = MoneyAmounts.cents(unitPrice).doubleValue();
         this.stockQuantity = stockQuantity;
         this.category = category;
-        this.discount = discount;
+        this.discount = MoneyAmounts.cents(discount).doubleValue();
     }
 
     public String getCode() { return code; }
@@ -32,24 +34,25 @@ public class ProductItem {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public double getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
+    public void setUnitPrice(double unitPrice) { this.unitPrice = MoneyAmounts.cents(unitPrice).doubleValue(); }
     public int getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
     public double getDiscount() { return discount; }
-    public void setDiscount(double discount) { this.discount = discount; }
+    public void setDiscount(double discount) { this.discount = MoneyAmounts.cents(discount).doubleValue(); }
 
     public double getTotalPrice() {
-        return unitPrice * stockQuantity;
+        return MoneyAmounts.cents(unitPrice).multiply(java.math.BigDecimal.valueOf(stockQuantity)).doubleValue();
     }
 
     public double getDiscountedTotal() {
-        return (unitPrice - discount) * stockQuantity;
+        return MoneyAmounts.cents(unitPrice).subtract(MoneyAmounts.cents(discount))
+                .multiply(java.math.BigDecimal.valueOf(stockQuantity)).doubleValue();
     }
 
     public double getTotalDiscount() {
-        return discount * stockQuantity;
+        return MoneyAmounts.cents(discount).multiply(java.math.BigDecimal.valueOf(stockQuantity)).doubleValue();
     }
 
     public double getTotal() {

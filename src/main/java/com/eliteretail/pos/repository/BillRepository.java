@@ -3,6 +3,7 @@ package com.eliteretail.pos.repository;
 import com.eliteretail.pos.database.DatabaseConnector;
 import com.eliteretail.pos.model.PaymentMethod;
 import com.eliteretail.pos.model.ProductItem;
+import com.eliteretail.pos.utils.MoneyAmounts;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -104,11 +105,11 @@ public class BillRepository {
             statement.setInt(3, serialNumber);
             statement.setString(4, cashierCode);
             statement.setString(5, cashierName);
-            statement.setDouble(6, totalAmount);
-            statement.setDouble(7, totalDiscount);
+            statement.setBigDecimal(6, MoneyAmounts.cents(totalAmount));
+            statement.setBigDecimal(7, MoneyAmounts.cents(totalDiscount));
             statement.setString(8, paymentMethod.name());
-            statement.setDouble(9, amountReceived);
-            statement.setDouble(10, changeAmount);
+            statement.setBigDecimal(9, MoneyAmounts.cents(amountReceived));
+            statement.setBigDecimal(10, MoneyAmounts.cents(changeAmount));
 
             if (statement.executeUpdate() == 0) {
                 throw new SQLException("Creating bill failed; no rows were affected.");
@@ -130,9 +131,9 @@ public class BillRepository {
                 statement.setInt(1, billId);
                 statement.setString(2, item.getCode());
                 statement.setString(3, item.getName());
-                statement.setDouble(4, item.getUnitPrice());
+                statement.setBigDecimal(4, MoneyAmounts.cents(item.getUnitPrice()));
                 statement.setInt(5, item.getStockQuantity());
-                statement.setDouble(6, item.getDiscount());
+                statement.setBigDecimal(6, MoneyAmounts.cents(item.getDiscount()));
                 statement.addBatch();
             }
             statement.executeBatch();

@@ -3,6 +3,10 @@ package com.eliteretail.pos.service;
 import com.eliteretail.pos.model.Discount;
 import com.eliteretail.pos.repository.DiscountRepository;
 
+import com.eliteretail.pos.utils.MoneyAmounts;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,19 +78,23 @@ public class DiscountService {
         if (quantity < discount.getMinQuantity()) {
             return 0.0;
         }
-        if (unitPrice * quantity < discount.getMinPurchaseAmount()) {
+        BigDecimal price = MoneyAmounts.cents(unitPrice);
+        if (price.multiply(BigDecimal.valueOf(quantity))
+                .compareTo(MoneyAmounts.cents(discount.getMinPurchaseAmount())) < 0) {
             return 0.0;
         }
 
         return switch (discount.getType()) {
-            case "PERCENT" -> Math.min(unitPrice, unitPrice * (discount.getValue() / 100.0));
-            case "FIXED_AMOUNT" -> Math.min(discount.getValue(), unitPrice);
-            case "BUY_X_GET_Y" -> calculateBuyXGetYPerUnit(unitPrice, discount, quantity);
+            case "PERCENT" -> price.multiply(MoneyAmounts.exact(discount.getValue()))
+                    .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP)
+                    .min(price).doubleValue();
+            case "FIXED_AMOUNT" -> MoneyAmounts.cents(discount.getValue()).min(price).doubleValue();
+            case "BUY_X_GET_Y" -> calculateBuyXGetYPerUnit(price, discount, quantity);
             default -> 0.0;
         };
     }
 
-    private double calculateBuyXGetYPerUnit(double unitPrice, Discount discount, int quantity) {
+    private double calculateBuyXGetYPerUnit(BigDecimal unitPrice, Discount discount, int quantity) {
         try {
             String[] parts = discount.getTargetValue().split("\\+");
             int buyX = Integer.parseInt(parts[0].trim());
@@ -95,7 +103,8 @@ public class DiscountService {
             int freeItems = (quantity / groupSize) * getY;
             int remainder = quantity % groupSize;
             freeItems += Math.max(0, Math.min(getY, remainder - buyX));
-            return (freeItems * unitPrice) / quantity;
+            return unitPrice.multiply(BigDecimal.valueOf(freeItems))
+                    .divide(BigDecimal.valueOf(quantity), 8, RoundingMode.HALF_UP).doubleValue();
         } catch (RuntimeException e) {
             LOGGER.log(Level.WARNING, "Unable to calculate BUY_X_GET_Y discount.", e);
             return 0.0;

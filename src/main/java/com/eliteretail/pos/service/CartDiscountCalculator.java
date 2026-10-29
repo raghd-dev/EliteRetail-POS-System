@@ -3,6 +3,9 @@ package com.eliteretail.pos.service;
 import com.eliteretail.pos.model.Discount;
 import com.eliteretail.pos.model.ProductItem;
 
+import com.eliteretail.pos.utils.MoneyAmounts;
+
+import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,25 +23,30 @@ public final class CartDiscountCalculator {
                                      DiscountService discountService) {
         Set<Integer> appliedIds = new LinkedHashSet<>();
         for (ProductItem item : cartItems) {
-            double perUnitDiscount = 0.0;
+            BigDecimal perUnitDiscount = BigDecimal.ZERO;
+            Set<Integer> lineDiscountIds = new LinkedHashSet<>();
             for (Discount discount : activeDiscounts) {
                 if (!"ALL".equals(discount.getApplyTo()) &&
                         !item.getName().equals(discount.getApplyTo())) {
                     continue;
                 }
-                double proposed = discountService.calculateDiscount(
-                        item.getUnitPrice(), discount, item.getStockQuantity());
-                double remaining = Math.max(0.0, item.getUnitPrice() - perUnitDiscount);
-                double contribution = Math.min(remaining, Math.max(0.0, proposed));
-                if (contribution > 1e-9) {
+                BigDecimal proposed = MoneyAmounts.exact(discountService.calculateDiscount(
+                        item.getUnitPrice(), discount, item.getStockQuantity())).max(BigDecimal.ZERO);
+                BigDecimal remaining = MoneyAmounts.cents(item.getUnitPrice()).subtract(perUnitDiscount)
+                        .max(BigDecimal.ZERO);
+                BigDecimal contribution = proposed.min(remaining);
+                if (contribution.signum() > 0) {
                     if (discount.getId() <= 0) {
                         throw new IllegalArgumentException("Applied discount must have a database ID.");
                     }
-                    perUnitDiscount += contribution;
-                    appliedIds.add(discount.getId());
+                    perUnitDiscount = perUnitDiscount.add(contribution);
+                    lineDiscountIds.add(discount.getId());
                 }
             }
-            item.setDiscount(perUnitDiscount);
+            // bill_items.discount is DECIMAL(12,2), so round per unit here,
+            // before calculating totals or persisting the sale.
+            item.setDiscount(MoneyAmounts.cents(perUnitDiscount).doubleValue());
+            if (item.getDiscount() > 0) appliedIds.addAll(lineDiscountIds);
         }
         return appliedIds;
     }

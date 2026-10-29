@@ -1,6 +1,9 @@
 package com.eliteretail.pos.controller;
 
 import com.eliteretail.pos.utils.UiEffects;
+import com.eliteretail.pos.utils.MoneyAmounts;
+
+import java.math.BigDecimal;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -50,22 +53,22 @@ public class PaymentDialogController {
     }
 
     public void setAmountDue(double amount) {
-        this.amountDue = amount;
-        amountDueLabel.setText(String.format("$%.2f", amount));
+        this.amountDue = MoneyAmounts.cents(amount).doubleValue();
+        amountDueLabel.setText("$" + MoneyAmounts.cents(amount).toPlainString());
     }
 
     private void updateChange() {
         try {
-            double received = Double.parseDouble(amountReceivedField.getText());
-            double change = received - amountDue;
-            changeLabel.setText(String.format("$%.2f", Math.max(change, 0)));
+            BigDecimal received = MoneyAmounts.parseCash(amountReceivedField.getText());
+            BigDecimal change = received.subtract(MoneyAmounts.cents(amountDue));
+            changeLabel.setText("$" + change.max(MoneyAmounts.cents(0)).toPlainString());
 
-            if (change < 0) {
+            if (change.signum() < 0) {
                 changeLabel.setStyle("-fx-text-fill: #B4232D; -fx-font-size: 16px;");
             } else {
                 changeLabel.setStyle("-fx-text-fill: #2F855A; -fx-font-size: 16px;");
             }
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             changeLabel.setText("$0.00");
             changeLabel.setStyle("-fx-text-fill: #617087; -fx-font-size: 16px;");
         }
@@ -78,18 +81,16 @@ public class PaymentDialogController {
 
         if ("CASH".equals(method)) {
             try {
-                received = Double.parseDouble(amountReceivedField.getText());
-                change = received - amountDue;
-                if (!Double.isFinite(received) || received < 0 ||
-                        !Double.isFinite(change)) {
-                    showError("Invalid amount", "Enter a finite, nonnegative cash amount.");
-                    return;
-                }
-                if (received < amountDue) {
+                BigDecimal cash = MoneyAmounts.parseCash(amountReceivedField.getText());
+                BigDecimal due = MoneyAmounts.cents(amountDue);
+                BigDecimal changeDue = cash.subtract(due);
+                received = cash.doubleValue();
+                change = changeDue.doubleValue();
+                if (cash.compareTo(due) < 0) {
                     showError("Insufficient amount received.", "Please enter at least $" + String.format("%.2f", amountDue));
                     return;
                 }
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 showError("Invalid amount", "Please enter a valid numeric amount.");
                 return;
             }

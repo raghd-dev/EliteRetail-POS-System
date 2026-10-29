@@ -12,6 +12,7 @@ import com.eliteretail.pos.model.Discount;
 import com.eliteretail.pos.model.PaymentMethod;
 import com.eliteretail.pos.model.ProductItem;
 import com.eliteretail.pos.utils.UiEffects;
+import com.eliteretail.pos.utils.MoneyAmounts;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -260,13 +261,11 @@ public class SalesController {
     }
 
     private double calculateSubtotal() {
-        return cartItems.stream()
-                .mapToDouble(item -> item.getUnitPrice() * item.getStockQuantity())
-                .sum();
+        return MoneyAmounts.subtotal(cartItems).doubleValue();
     }
 
     private double calculateFinalTotal() {
-        return Math.max(0.0, calculateSubtotal() - totalDiscount);
+        return MoneyAmounts.total(cartItems).doubleValue();
     }
 
     private boolean validateStockAvailability(ProductItem product, int quantity) {
@@ -278,7 +277,7 @@ public class SalesController {
         List<Discount> activeDiscounts = discountService.getActiveDiscounts();
         appliedDiscountIds.clear();
         appliedDiscountIds.addAll(CartDiscountCalculator.apply(cartItems, activeDiscounts, discountService));
-        totalDiscount = cartItems.stream().mapToDouble(ProductItem::getTotalDiscount).sum();
+        totalDiscount = MoneyAmounts.discountTotal(cartItems).doubleValue();
         productTable.refresh();
         updateTotals();
     }
