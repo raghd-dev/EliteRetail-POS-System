@@ -5,6 +5,10 @@
 <h1 align="center">EliteRetail POS System</h1>
 
 <p align="center">
+  <a href="https://github.com/raghd-dev/EliteRetail-POS-System/actions/workflows/maven-ci.yml"><img alt="Java CI (Maven)" src="https://github.com/raghd-dev/EliteRetail-POS-System/actions/workflows/maven-ci.yml/badge.svg?branch=main"></a>
+</p>
+
+<p align="center">
 A JavaFX-based Point of Sale and retail management application.
 </p>
 
@@ -27,7 +31,7 @@ This project was created to practice building a complete desktop application usi
 
 Completed
 
-The system is fully functional with:
+The academic demonstration includes:
 - Authentication
 - Inventory management
 - POS checkout
@@ -245,6 +249,7 @@ EliteRetail-POS-System/
 ├── database/
 │   └── pos_db.sql
 ├── docs/
+│   ├── ENGINEERING_VERIFICATION_2026-10-29.md
 │   ├── PROJECT_REVIEW.md
 │   ├── UI_REDESIGN.md
 │   ├── VALIDATION_REPORT.md
@@ -290,6 +295,9 @@ Additional engineering documentation is available in the `docs/` folder:
 
 - **FINAL_POLISH_REPORT.md**  
   Final polishing notes covering the splash screen, documentation organization, and final verification steps.
+
+- **ENGINEERING_VERIFICATION_2026-10-29.md**
+  Scope and evidence for the October 2026 checkout, money-precision, authentication and CI improvements.
 ---
 
 ## Requirements
@@ -319,11 +327,13 @@ git clone https://github.com/raghd-dev/EliteRetail-POS-System.git
 
 ### 2. Setup Database
 
-Create the database using:
+For a **fresh disposable demo database only**, create the schema and sample data:
 
 ```bash
 mysql -u root -p < database/pos_db.sql
 ```
+
+> **Warning:** This script drops and recreates EliteRetail tables in `pos_db`. Back up any data you want to retain before running it. It is not a safe migration for an existing database.
 
 ---
 
@@ -335,7 +345,7 @@ Create a file named:
 database.properties
 ```
 
-Add your database information:
+Copy `database.properties.example` to `database.properties`, then add your own local database information:
 
 ```properties
 db.url=jdbc:mysql://localhost:3306/pos_db
@@ -382,22 +392,40 @@ These accounts are included for testing purposes only.
 
 ## Security
 
-Implemented security practices:
+Implemented and reviewed application practices:
 
-- Prepared SQL statements
-- Password hashing support
-- Role-based permissions
-- Transaction-safe database operations
+- Prepared SQL statements and externalized local MySQL credentials (`database.properties` is Git-ignored).
+- PBKDF2-HMAC-SHA256 password verification for demo accounts; no legacy plaintext fallback in the updated application.
+- Manager/cashier permission checks in the service layer, in addition to the UI.
+- Checkout database transactions to keep bills, line items, inventory changes and discount usage consistent on rollback.
+
+> This is a local academic JavaFX application, **not a production-certified security system**. Service-layer authorization is not a replacement for database-side access controls when the desktop client has direct database credentials.
 
 ---
 
+## Engineering Improvements and Verification — October 29, 2026
+
+The `fix/checkout-integrity` development branch includes:
+
+- **Discount usage tracking:** Applies promotion usage limits and updates `times_used` transactionally when a sale succeeds.
+- **Checkout integrity:** Validates payment amounts and sale inputs, and uses connection-scoped MySQL locking for final receipt-number allocation.
+- **Money precision:** Uses `BigDecimal` for critical cent-based arithmetic and database writes while retaining JavaFX-compatible view models.
+- **Authentication and authorization:** Rejects legacy plaintext-password verification, clears failed-login session state, and enforces manager/cashier permissions in application services.
+- **Automated CI:** A Java 21 GitHub Actions workflow runs Maven compilation and tests on pushes and pull requests.
+
 ## Testing
 
-Run:
+Run the database-independent tests with Java 21 and Maven:
 
 ```bash
-mvn test
+mvn clean test
 ```
+
+**Verified locally on October 29, 2026:** `BUILD SUCCESS` — **26 JUnit tests, zero failures, zero errors, zero skipped**. The developer also confirmed a green GitHub Actions workflow on the development branch and successful manual checks of manager/cashier login, checkout, discount usage and rollback behavior.
+
+**Not yet independently verified:** simultaneous multi-cashier MySQL checkout/load testing and an independent security audit. Green CI is evidence of the configured tests, not a production security certification.
+
+See [Engineering Verification](docs/ENGINEERING_VERIFICATION_2026-10-29.md) for the exact tested scope and limitations.
 
 ---
 
