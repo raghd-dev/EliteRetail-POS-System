@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import com.eliteretail.pos.service.DiscountService;
+import com.eliteretail.pos.service.CartDiscountCalculator;
 import com.eliteretail.pos.service.ProductService;
 import com.eliteretail.pos.service.SalesService;
 import com.eliteretail.pos.model.Discount;
@@ -29,6 +30,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 public class SalesController {
 
@@ -58,6 +61,7 @@ public class SalesController {
     private final ProductService productService = new ProductService();
     private final SalesService salesService = new SalesService();
     private double totalDiscount = 0.0;
+    private final Set<Integer> appliedDiscountIds = new LinkedHashSet<>();
     private Timeline clock;
 
     @FXML
@@ -271,30 +275,10 @@ public class SalesController {
     }
 
     private void applyDiscountsToCart() {
-        totalDiscount = 0.0;
         List<Discount> activeDiscounts = discountService.getActiveDiscounts();
-
-        for (ProductItem item : cartItems) {
-            double itemDiscount = 0.0;
-
-            for (Discount discount : activeDiscounts) {
-
-                if ("ALL".equals(discount.getApplyTo()) ||
-                        item.getName().equals(discount.getApplyTo())) {
-
-                    double discountAmount = discountService.calculateDiscount(
-                            item.getUnitPrice(),
-                            discount,
-                            item.getStockQuantity()
-                    );
-                    itemDiscount = Math.min(item.getUnitPrice(), itemDiscount + discountAmount);
-                }
-            }
-
-            item.setDiscount(itemDiscount);
-            totalDiscount += itemDiscount * item.getStockQuantity();
-        }
-
+        appliedDiscountIds.clear();
+        appliedDiscountIds.addAll(CartDiscountCalculator.apply(cartItems, activeDiscounts, discountService));
+        totalDiscount = cartItems.stream().mapToDouble(ProductItem::getTotalDiscount).sum();
         productTable.refresh();
         updateTotals();
     }
@@ -370,6 +354,8 @@ public class SalesController {
         }
 
         try {
+            // Refresh promotions just before collecting payment.
+            applyDiscountsToCart();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/payment-dialog.fxml"));
             Parent root = loader.load();
             UiEffects.prepare(root);
@@ -425,18 +411,21 @@ public class SalesController {
                     method,
                     received,
                     change,
-                    List.copyOf(cartItems)
+                    List.copyOf(cartItems),
+                    Set.copyOf(appliedDiscountIds)
             );
 
             showReceipt(method, amount, received, change);
             resetPageForNextCustomer();
         } catch (SQLException | NumberFormatException e) {
+            applyDiscountsToCart();
             showAlert("Transaction Error", "The sale could not be completed. No inventory changes were committed. " + e.getMessage());
         }
     }
 
     private void resetPageForNextCustomer() {
         cartItems.clear();
+        appliedDiscountIds.clear();
         totalDiscount = 0.0;
         updateBillSerial();
         updateTotals();

@@ -143,6 +143,35 @@ public class DiscountRepository {
         return discounts;
     }
 
+    /**
+     * Consumes each discount once per successful sale, never once per cart item.
+     * This method MUST be called with the sale's existing transaction connection.
+     * Conditional updates enforce usage limits even when two cashiers race.
+     */
+    public void incrementUsage(Connection connection, java.util.Set<Integer> appliedDiscountIds)
+            throws SQLException {
+        if (appliedDiscountIds == null || appliedDiscountIds.isEmpty()) {
+            return;
+        }
+        String sql = "UPDATE discounts SET times_used = times_used + 1 " +
+                "WHERE id = ? AND active = TRUE AND start_date <= CURDATE() " +
+                "AND end_date >= CURDATE() " +
+                "AND (usage_limit = 0 OR times_used < usage_limit)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            // Use one stable lock order to reduce the chance of database deadlocks.
+            for (Integer id : new java.util.TreeSet<>(appliedDiscountIds)) {
+                if (id == null || id <= 0) {
+                    throw new SQLException("Invalid applied discount ID.");
+                }
+                statement.setInt(1, id);
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException("Applied discount " + id +
+                            " is no longer available. Refresh the cart and retry checkout.");
+                }
+            }
+        }
+    }
+
     private Discount createDiscountFromResultSet(ResultSet rs) throws SQLException {
         return new Discount(
                 rs.getInt("id"),
