@@ -10,9 +10,14 @@ import com.eliteretail.pos.repository.ProductRepository;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Set;
 
 public class SalesService {
+    private static final Logger LOGGER = Logger.getLogger(SalesService.class.getName());
+
+    public record SaleResult(int billId, String billNumber, int serialNumber) {}
     private final BillRepository billRepository = new BillRepository();
     private final ProductRepository productRepository = new ProductRepository();
     private final DiscountRepository discountRepository = new DiscountRepository();
@@ -21,12 +26,14 @@ public class SalesService {
         return billRepository.getNextDailySerial(machineNumber);
     }
 
-    public int recordSale(
+    /**
+     * Receipts are allocated only when the sale is committed; any displayed
+     * number before payment is a preview and may differ under concurrency.
+     */
+    public SaleResult recordSale(
             String cashierCode,
             String cashierName,
-            String billNumber,
             String machineNumber,
-            int serialNumber,
             double totalAmount,
             double totalDiscount,
             PaymentMethod paymentMethod,
@@ -35,24 +42,42 @@ public class SalesService {
             List<ProductItem> items,
             Set<Integer> appliedDiscountIds
     ) throws SQLException {
+        CheckoutValidator.validate(totalAmount, totalDiscount, paymentMethod,
+                amountReceived, changeAmount, items);
         try (Connection connection = DatabaseConnector.getConnection()) {
-            boolean previousAutoCommit = connection.getAutoCommit();
+            // Each checkout owns a fresh connection, which is closed after the sale.
             connection.setAutoCommit(false);
+            boolean lockAcquired = false;
             try {
+                billRepository.acquireSerialLock(connection, machineNumber);
+                lockAcquired = true;
+                BillRepository.BillNumber number = billRepository.allocateBillNumber(connection, machineNumber);
                 int billId = billRepository.insertBill(
-                        connection, cashierCode, cashierName, billNumber, machineNumber, serialNumber,
+                        connection, cashierCode, cashierName, number.value(), machineNumber, number.serial(),
                         totalAmount, totalDiscount, paymentMethod, amountReceived, changeAmount
                 );
                 billRepository.insertItems(connection, billId, items);
                 productRepository.decrementStock(connection, items);
                 discountRepository.incrementUsage(connection, appliedDiscountIds);
                 connection.commit();
-                return billId;
+                return new SaleResult(billId, number.value(), number.serial());
             } catch (SQLException | RuntimeException e) {
-                connection.rollback();
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackError) {
+                    e.addSuppressed(rollbackError);
+                }
                 throw e;
             } finally {
-                connection.setAutoCommit(previousAutoCommit);
+                if (lockAcquired) {
+                    try {
+                        // User-level MySQL locks are NOT released by COMMIT or ROLLBACK.
+                        billRepository.releaseSerialLock(connection, machineNumber);
+                    } catch (SQLException releaseError) {
+                        // Closing the JDBC connection below also releases this session lock.
+                        LOGGER.log(Level.WARNING, "Unable to explicitly release bill serial lock.", releaseError);
+                    }
+                }
             }
         }
     }

@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Locale;
 
 public class BillRepository {
     public int getNextDailySerial(String machineNumber) throws SQLException {
@@ -23,6 +24,62 @@ public class BillRepository {
             }
         }
     }
+
+    /**
+     * Coordinates daily serial allocation across separate application instances.
+     * MySQL named locks are connection-scoped (not transaction-scoped), so the
+     * caller must release after COMMIT or ROLLBACK on this same connection.
+     */
+    public void acquireSerialLock(Connection connection, String machineNumber) throws SQLException {
+        String sql = "SELECT GET_LOCK(?, 10)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, lockName(machineNumber));
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next() || result.getInt(1) != 1 || result.wasNull()) {
+                    throw new SQLException("Could not reserve a receipt number. Please retry checkout.");
+                }
+            }
+        }
+    }
+
+    public void releaseSerialLock(Connection connection, String machineNumber) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT RELEASE_LOCK(?)")) {
+            statement.setString(1, lockName(machineNumber));
+            statement.executeQuery();
+        }
+    }
+
+    private static String lockName(String machineNumber) throws SQLException {
+        if (machineNumber == null || !machineNumber.matches("[a-zA-Z0-9_-]{1,32}")) {
+            throw new SQLException("Invalid POS machine number.");
+        }
+        return "eliteretail:serial:" + machineNumber;
+    }
+
+    /** Called only while holding acquireSerialLock, on the sale connection. */
+    public BillNumber allocateBillNumber(Connection connection, String machineNumber) throws SQLException {
+        String sql = "SELECT COALESCE(MAX(serial_number), 0) + 1 " +
+                "FROM bills WHERE machine_number = ? AND DATE(created_at) = CURDATE()";
+        int serial;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, machineNumber);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) throw new SQLException("Unable to allocate daily serial.");
+                serial = result.getInt(1);
+            }
+        }
+        String date;
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT DATE_FORMAT(CURDATE(), '%Y%m%d')")) {
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) throw new SQLException("Unable to read the database date.");
+                date = result.getString(1);
+            }
+        }
+        return new BillNumber(String.format(Locale.ROOT, "%s-%s-%04d", machineNumber, date, serial), serial);
+    }
+
+    public record BillNumber(String value, int serial) {}
 
     public int insertBill(
             Connection connection,

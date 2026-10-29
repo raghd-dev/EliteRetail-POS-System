@@ -237,8 +237,8 @@ public class SalesController {
         try {
             return salesService.getNextDailySerial(machineNumber);
         } catch (SQLException e) {
-            showAlert("Database Error", "Could not fetch the next bill number. Using serial 1 for this session.");
-            return 1;
+            showAlert("Database Error", "Could not preview the next bill number.");
+            return 0;
         }
     }
 
@@ -397,15 +397,10 @@ public class SalesController {
 
     private void completePayment(PaymentMethod method, double amount, double received, double change) {
         try {
-            String billNumber = billSerialLabel.getText();
-            int serialNumber = Integer.parseInt(billNumber.substring(billNumber.lastIndexOf('-') + 1));
-
-            salesService.recordSale(
+            SalesService.SaleResult sale = salesService.recordSale(
                     cashierCodeLabel.getText(),
                     cashierNameLabel.getText(),
-                    billNumber,
                     MACHINE_NUMBER,
-                    serialNumber,
                     amount,
                     totalDiscount,
                     method,
@@ -415,7 +410,7 @@ public class SalesController {
                     Set.copyOf(appliedDiscountIds)
             );
 
-            showReceipt(method, amount, received, change);
+            showReceipt(sale.billNumber(), method, amount, received, change);
             resetPageForNextCustomer();
         } catch (SQLException | NumberFormatException e) {
             applyDiscountsToCart();
@@ -456,7 +451,8 @@ public class SalesController {
     }
 
     /* ================= RECEIPT ================= */
-    private void showReceipt(PaymentMethod method, double amount, double received, double change) {
+    private void showReceipt(String confirmedBillNumber, PaymentMethod method,
+                             double amount, double received, double change) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/receipt.fxml"));
             Parent root = loader.load();
@@ -464,10 +460,8 @@ public class SalesController {
 
             ReceiptController controller = loader.getController();
 
-            String billNumber = billSerialLabel.getText();
-
             controller.setReceiptData(
-                    billNumber,
+                    confirmedBillNumber,
                     cashierNameLabel.getText(),
                     cartItems,
                     calculateSubtotal(),

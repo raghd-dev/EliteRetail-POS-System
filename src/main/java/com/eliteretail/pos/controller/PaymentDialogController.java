@@ -80,6 +80,11 @@ public class PaymentDialogController {
             try {
                 received = Double.parseDouble(amountReceivedField.getText());
                 change = received - amountDue;
+                if (!Double.isFinite(received) || received < 0 ||
+                        !Double.isFinite(change)) {
+                    showError("Invalid amount", "Enter a finite, nonnegative cash amount.");
+                    return;
+                }
                 if (received < amountDue) {
                     showError("Insufficient amount received.", "Please enter at least $" + String.format("%.2f", amountDue));
                     return;
@@ -90,6 +95,10 @@ public class PaymentDialogController {
             }
         }
 
+        if (!Double.isFinite(amountDue) || amountDue < 0) {
+            showError("Invalid total", "The sale total is invalid. Return to the cart.");
+            return;
+        }
         result = new PaymentResult(method, amountDue, received, change);
         close();
     }
